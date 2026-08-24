@@ -1,17 +1,37 @@
-import { LayoutDashboard } from 'lucide-react'
-import PagePlaceholder from '../../components/ui/PagePlaceholder'
+import { Activity, ShieldAlert, Target, Users } from 'lucide-react'
+import HighRiskCustomersTable from './components/HighRiskCustomersTable'
+import MetricCard from './components/MetricCard'
+import RiskDistributionChart from './components/RiskDistributionChart'
+import { dashboardMetrics, highRiskCustomers, riskDistribution } from './dashboardData'
+
+const metricIcons = {
+  'total-customers': Users,
+  'high-risk-customers': ShieldAlert,
+  'average-churn-risk': Activity,
+  'retention-actions': Target,
+}
 
 function DashboardPage() {
   return (
-    <PagePlaceholder
-      title="Dashboard"
-      description="CRM overview and churn analytics will appear here."
-    >
-      <div className="flex items-center gap-3 text-slate-500">
-        <LayoutDashboard aria-hidden="true" size={22} />
-        <p className="text-sm">Dashboard modules will be added in a later stage.</p>
+    <section aria-labelledby="dashboard-title" className="space-y-6">
+      <div>
+        <h2 id="dashboard-title" className="text-2xl font-semibold tracking-tight text-slate-950">
+          Dashboard
+        </h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          Monitor customer churn risk and prioritize retention activity.
+        </p>
       </div>
-    </PagePlaceholder>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {dashboardMetrics.map((metric) => (
+          <MetricCard key={metric.id} {...metric} icon={metricIcons[metric.id]} />
+        ))}
+      </div>
+
+      <RiskDistributionChart data={riskDistribution} />
+      <HighRiskCustomersTable customers={highRiskCustomers} />
+    </section>
   )
 }
 
