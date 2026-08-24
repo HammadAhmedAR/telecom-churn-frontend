@@ -2,6 +2,8 @@ import { ArrowLeft, ChevronRight, CircleUserRound, CreditCard, Wifi } from 'luci
 import { Link, useParams } from 'react-router-dom'
 import RiskBadge from '../../components/ui/RiskBadge'
 import WhatIfSimulator from '../simulation/WhatIfSimulator'
+import RetentionActionForm from '../retention/components/RetentionActionForm'
+import RetentionHistory from '../retention/components/RetentionHistory'
 import ChurnRiskCard from './components/ChurnRiskCard'
 import CustomerDetailsSection from './components/CustomerDetailsSection'
 import CustomerOverview from './components/CustomerOverview'
@@ -102,6 +104,15 @@ function CustomerProfilePage() {
         <h3 id="retention-support-title" className="text-base font-semibold text-slate-900">Retention Decision Support</h3>
         <p className="mt-1 text-sm text-slate-500">Explore temporary account scenarios without changing the customer record.</p>
         <WhatIfSimulator key={customer.customerId} customer={customer} />
+      </section>
+
+      <section aria-labelledby="retention-action-title" className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <h3 id="retention-action-title" className="text-base font-semibold text-slate-900">Retention Action</h3>
+        <p className="mt-1 text-sm text-slate-500">Record the retention intervention selected for this customer.</p>
+        <div className="mt-4 grid gap-5 xl:grid-cols-2">
+          <RetentionActionForm key={customer.customerId} customer={customer} />
+          <RetentionHistory customerId={customer.customerId} />
+        </div>
       </section>
     </article>
   )
