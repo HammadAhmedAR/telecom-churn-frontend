@@ -1,6 +1,7 @@
-import { ArrowLeft, ChevronRight, CircleUserRound, CreditCard, SlidersHorizontal, Wifi } from 'lucide-react'
+import { ArrowLeft, ChevronRight, CircleUserRound, CreditCard, Wifi } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import RiskBadge from '../../components/ui/RiskBadge'
+import WhatIfSimulator from '../simulation/WhatIfSimulator'
 import ChurnRiskCard from './components/ChurnRiskCard'
 import CustomerDetailsSection from './components/CustomerDetailsSection'
 import CustomerOverview from './components/CustomerOverview'
@@ -99,22 +100,8 @@ function CustomerProfilePage() {
 
       <section aria-labelledby="retention-support-title" className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <h3 id="retention-support-title" className="text-base font-semibold text-slate-900">Retention Decision Support</h3>
-        <div className="mt-4 flex flex-col gap-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white text-brand-700 shadow-sm">
-              <SlidersHorizontal aria-hidden="true" size={20} />
-            </span>
-            <div>
-              <h4 className="font-semibold text-slate-900">What-If Simulation</h4>
-              <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
-                Test how modifiable customer attributes may affect the predicted churn risk.
-              </p>
-            </div>
-          </div>
-          <span className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500">
-            Simulation controls will be added in the next step
-          </span>
-        </div>
+        <p className="mt-1 text-sm text-slate-500">Explore temporary account scenarios without changing the customer record.</p>
+        <WhatIfSimulator key={customer.customerId} customer={customer} />
       </section>
     </article>
   )
