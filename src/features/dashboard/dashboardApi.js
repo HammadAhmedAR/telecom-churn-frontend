@@ -4,6 +4,7 @@ export const dashboardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getDashboardSummary: builder.query({
       query: () => '/dashboard/summary',
+      providesTags: [{ type: 'Dashboard', id: 'SUMMARY' }],
     }),
   }),
 })

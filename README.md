@@ -8,3 +8,5 @@ Set `VITE_API_BASE_URL` to the Express API base URL (for example, `http://localh
 The authenticated Dashboard loads live PostgreSQL-backed metrics from `GET /api/dashboard/summary`; the shared base API attaches the JWT automatically.
 
 Customer list and profile routes use authenticated RTK Query requests to `GET /api/customers` and `GET /api/customers/:customerId`, with filtering and pagination handled by the backend.
+
+Retention actions use authenticated backend APIs and PostgreSQL persistence; RTK Query refreshes customer history, global history, and the Dashboard count after creation.

@@ -1,40 +1,48 @@
-import { CheckCircle2, ClipboardPlus } from 'lucide-react'
+import { AlertCircle, CheckCircle2, ClipboardPlus } from 'lucide-react'
 import { useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { RETENTION_ACTION_TYPES } from '../retentionData'
-import { retentionActionLogged } from '../retentionSlice'
+import { useCreateRetentionActionMutation } from '../retentionApi'
+import { RETENTION_ACTION_TYPES } from '../retentionConstants'
 
 const NOTES_LIMIT = 500
 
 function RetentionActionForm({ customer }) {
-  const dispatch = useDispatch()
+  const [createRetentionAction, { isLoading }] = useCreateRetentionActionMutation()
   const [actionType, setActionType] = useState('')
   const [notes, setNotes] = useState('')
   const [showSuccess, setShowSuccess] = useState(false)
+  const [formError, setFormError] = useState('')
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    if (!actionType) return
+    if (!RETENTION_ACTION_TYPES.includes(actionType) || isLoading) return
 
-    dispatch(retentionActionLogged({
-      customerId: customer.customerId,
-      customerName: customer.customerId,
-      actionType,
-      notes: notes.trim(),
-    }))
-    setActionType('')
-    setNotes('')
-    setShowSuccess(true)
+    setShowSuccess(false)
+    setFormError('')
+
+    try {
+      await createRetentionAction({
+        customerId: customer.customerId,
+        actionType,
+        notes: notes.trim(),
+      }).unwrap()
+      setActionType('')
+      setNotes('')
+      setShowSuccess(true)
+    } catch {
+      setFormError('Unable to log retention action. Please try again.')
+    }
   }
 
   function updateActionType(value) {
     setActionType(value)
     setShowSuccess(false)
+    setFormError('')
   }
 
   function updateNotes(value) {
     setNotes(value)
     setShowSuccess(false)
+    setFormError('')
   }
 
   return (
@@ -53,6 +61,13 @@ function RetentionActionForm({ customer }) {
         <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm font-medium text-emerald-700" role="status">
           <CheckCircle2 aria-hidden="true" size={18} />
           Retention action logged successfully.
+        </div>
+      )}
+
+      {formError && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm font-medium text-red-700" role="alert">
+          <AlertCircle aria-hidden="true" size={18} />
+          {formError}
         </div>
       )}
 
@@ -85,10 +100,10 @@ function RetentionActionForm({ customer }) {
 
       <button
         type="submit"
-        disabled={!actionType}
+        disabled={!actionType || isLoading}
         className="mt-4 inline-flex h-10 items-center justify-center rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
       >
-        Log Retention Action
+        {isLoading ? 'Logging...' : 'Log Retention Action'}
       </button>
     </form>
   )
