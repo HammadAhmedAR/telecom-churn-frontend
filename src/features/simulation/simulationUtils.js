@@ -1,5 +1,3 @@
-import { getRiskPercentage } from '../../utils/riskLevel'
-
 export function getInitialSimulationValues(customer) {
   return {
     contract: customer.contract,
@@ -10,25 +8,19 @@ export function getInitialSimulationValues(customer) {
 }
 
 export function hasSimulationChanges(customer, simulationValues) {
-  const actualValues = getInitialSimulationValues(customer)
-
-  return Object.keys(actualValues).some((field) => actualValues[field] !== simulationValues[field])
+  return Object.keys(buildSimulationOverrides(customer, simulationValues)).length > 0
 }
 
-export function buildSimulationPayload(simulationValues) {
-  return {
+export function buildSimulationOverrides(customer, simulationValues) {
+  const actualValues = getInitialSimulationValues(customer)
+  const normalizedValues = {
     contract: simulationValues.contract,
     monthlyCharges: Number(simulationValues.monthlyCharges),
     techSupport: simulationValues.techSupport,
     onlineSecurity: simulationValues.onlineSecurity,
   }
-}
 
-export function formatPercentagePointDifference(originalRisk, simulatedRisk) {
-  const difference = getRiskPercentage(simulatedRisk) - getRiskPercentage(originalRisk)
-  const roundedDifference = Number(difference.toFixed(1))
-  const sign = roundedDifference > 0 ? '+' : ''
-  const unit = Math.abs(roundedDifference) === 1 ? 'percentage point' : 'percentage points'
-
-  return `${sign}${roundedDifference} ${unit}`
+  return Object.fromEntries(
+    Object.entries(normalizedValues).filter(([field, value]) => actualValues[field] !== value),
+  )
 }

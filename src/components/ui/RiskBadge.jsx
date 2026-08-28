@@ -12,8 +12,9 @@ const riskLabels = {
   high: 'High',
 }
 
-function RiskBadge({ risk }) {
-  const level = getRiskLevel(risk)
+function RiskBadge({ risk, level: providedLevel }) {
+  const normalizedLevel = typeof providedLevel === 'string' ? providedLevel.toLowerCase() : ''
+  const level = riskStyles[normalizedLevel] ? normalizedLevel : getRiskLevel(risk)
   const percentage = getRiskPercentage(risk)
   const formattedRisk = Number.isInteger(percentage) ? percentage : percentage.toFixed(1)
 

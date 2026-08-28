@@ -1,7 +1,8 @@
 import { RotateCcw, Send, SlidersHorizontal } from 'lucide-react'
 import { useState } from 'react'
 import SimulationResult from './components/SimulationResult'
-import { buildSimulationPayload, getInitialSimulationValues, hasSimulationChanges } from './simulationUtils'
+import { useSimulateCustomerMutation } from './simulationApi'
+import { buildSimulationOverrides, getInitialSimulationValues, hasSimulationChanges } from './simulationUtils'
 
 const contracts = ['Month-to-month', 'One year', 'Two year']
 const binaryOptions = ['Yes', 'No']
@@ -20,36 +21,59 @@ function FieldFrame({ label, actualValue, children }) {
   )
 }
 
+function getSimulationErrorMessage(error) {
+  if (error?.status === 503) {
+    return 'Prediction service is temporarily unavailable. Please try again.'
+  }
+
+  if (error?.status === 400) {
+    return typeof error.data?.message === 'string' && error.data.message.trim()
+      ? error.data.message
+      : 'The simulation inputs are not valid. Please review them and try again.'
+  }
+
+  return 'Unable to calculate simulated churn risk. Please try again.'
+}
+
 function WhatIfSimulator({ customer }) {
+  const [simulateCustomer, { isLoading, reset: resetMutation }] = useSimulateCustomerMutation()
   const [simulationValues, setSimulationValues] = useState(() => getInitialSimulationValues(customer))
-  const [preparedPayload, setPreparedPayload] = useState(null)
   const [simulationResult, setSimulationResult] = useState(null)
-  const [predictionError, setPredictionError] = useState(null)
+  const [predictionError, setPredictionError] = useState('')
   const hasInternetService = customer.internetService !== 'No'
   const hasChanges = hasSimulationChanges(customer, simulationValues)
-  const isLoading = false
+
+  function clearOutcome() {
+    setSimulationResult(null)
+    setPredictionError('')
+    resetMutation()
+  }
 
   function updateValue(field, value) {
     setSimulationValues((currentValues) => ({ ...currentValues, [field]: value }))
-    setPreparedPayload(null)
-    setSimulationResult(null)
-    setPredictionError(null)
+    clearOutcome()
   }
 
   function resetSimulation() {
     setSimulationValues(getInitialSimulationValues(customer))
-    setPreparedPayload(null)
-    setSimulationResult(null)
-    setPredictionError(null)
+    clearOutcome()
   }
 
-  function runSimulation() {
-    if (!hasChanges) return
+  async function runSimulation() {
+    if (!hasChanges || isLoading) return
 
-    setPreparedPayload(buildSimulationPayload(simulationValues))
+    const overrides = buildSimulationOverrides(customer, simulationValues)
+    if (Object.keys(overrides).length === 0) return
+
     setSimulationResult(null)
-    setPredictionError(null)
-    // Future integration: send this payload through an RTK Query mutation to POST /api/customers/:id/simulate.
+    setPredictionError('')
+
+    try {
+      const result = await simulateCustomer({ customerId: customer.customerId, overrides }).unwrap()
+      setSimulationResult(result)
+    } catch (error) {
+      setPredictionError(getSimulationErrorMessage(error))
+    }
   }
 
   return (
@@ -142,7 +166,7 @@ function WhatIfSimulator({ customer }) {
           <button
             type="button"
             onClick={resetSimulation}
-            disabled={!hasChanges && !preparedPayload && !simulationResult && !predictionError}
+            disabled={!hasChanges && !simulationResult && !predictionError}
             className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-45"
           >
             <RotateCcw aria-hidden="true" size={17} />
@@ -155,7 +179,7 @@ function WhatIfSimulator({ customer }) {
             className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             <Send aria-hidden="true" size={17} />
-            Run Simulation
+            {isLoading ? 'Calculating...' : 'Run Simulation'}
           </button>
         </div>
       </div>
@@ -163,7 +187,6 @@ function WhatIfSimulator({ customer }) {
       <SimulationResult
         originalRisk={customer.churnRisk}
         hasChanges={hasChanges}
-        preparedPayload={preparedPayload}
         isLoading={isLoading}
         result={simulationResult}
         error={predictionError}
