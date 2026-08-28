@@ -40,7 +40,7 @@ function ChurnRiskCard({ risk }) {
         </span>
         <div>
           <h3 id="risk-title" className="text-base font-semibold text-slate-900">Current Churn Risk</h3>
-          <p className="text-xs text-slate-500">Temporary customer fixture value</p>
+          <p className="text-xs text-slate-500">Stored baseline prediction</p>
         </div>
       </div>
       <div className="mt-6 flex flex-wrap items-end justify-between gap-4">

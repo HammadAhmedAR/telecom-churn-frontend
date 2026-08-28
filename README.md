@@ -6,3 +6,5 @@ React frontend for the Intelligent CRM System with Integrated Predictive Analyti
 Set `VITE_API_BASE_URL` to the Express API base URL (for example, `http://localhost:5000/api`). The login page sends credentials to `POST /auth/login` through the shared RTK Query API. Successful sessions store only the JWT and safe user fields in `localStorage`, protect internal CRM routes, and attach the token to future RTK Query requests. Logout clears Redux auth state, persisted auth, and the RTK Query cache.
 
 The authenticated Dashboard loads live PostgreSQL-backed metrics from `GET /api/dashboard/summary`; the shared base API attaches the JWT automatically.
+
+Customer list and profile routes use authenticated RTK Query requests to `GET /api/customers` and `GET /api/customers/:customerId`, with filtering and pagination handled by the backend.

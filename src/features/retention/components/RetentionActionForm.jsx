@@ -18,7 +18,7 @@ function RetentionActionForm({ customer }) {
 
     dispatch(retentionActionLogged({
       customerId: customer.customerId,
-      customerName: customer.name,
+      customerName: customer.customerId,
       actionType,
       notes: notes.trim(),
     }))

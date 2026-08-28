@@ -14,8 +14,8 @@ function CustomerTable({ customers }) {
         <table className="w-full min-w-5xl text-left text-sm">
           <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
             <tr>
-              <th scope="col" className="px-6 py-3 font-semibold">Customer</th>
               <th scope="col" className="px-6 py-3 font-semibold">Customer ID</th>
+              <th scope="col" className="px-6 py-3 font-semibold">Internet Service</th>
               <th scope="col" className="px-6 py-3 font-semibold">Contract</th>
               <th scope="col" className="px-6 py-3 text-right font-semibold">Monthly Charges</th>
               <th scope="col" className="px-6 py-3 text-right font-semibold">Tenure</th>
@@ -27,9 +27,9 @@ function CustomerTable({ customers }) {
             {customers.length > 0 ? customers.map((customer) => (
               <tr key={customer.customerId} className="hover:bg-slate-50/70">
                 <th scope="row" className="whitespace-nowrap px-6 py-4 font-medium text-slate-900">
-                  {customer.name}
+                  <span className="font-mono text-xs">{customer.customerId}</span>
                 </th>
-                <td className="whitespace-nowrap px-6 py-4 font-mono text-xs text-slate-600">{customer.customerId}</td>
+                <td className="whitespace-nowrap px-6 py-4 text-slate-600">{customer.internetService}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-slate-600">{customer.contract}</td>
                 <td className="whitespace-nowrap px-6 py-4 text-right font-medium text-slate-700">
                   {currencyFormatter.format(customer.monthlyCharges)}
@@ -54,8 +54,8 @@ function CustomerTable({ customers }) {
               <tr>
                 <td colSpan="7" className="px-6 py-14 text-center">
                   <SearchX className="mx-auto text-slate-400" aria-hidden="true" size={32} />
-                  <p className="mt-3 font-semibold text-slate-800">No customers found.</p>
-                  <p className="mt-1 text-sm text-slate-500">Try changing your search or filters.</p>
+                  <p className="mt-3 font-semibold text-slate-800">No customers match the selected filters.</p>
+                  <p className="mt-1 text-sm text-slate-500">Try another Customer ID or clear a filter.</p>
                 </td>
               </tr>
             )}

@@ -12,7 +12,7 @@ function CustomerFilters({ search, riskFilter, contractFilter, hasActiveFilters,
               type="search"
               value={search}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Search by customer ID or name..."
+              placeholder="Search by Customer ID..."
               className="h-10 w-full rounded-lg border border-slate-300 bg-white pr-3 pl-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100"
             />
           </span>

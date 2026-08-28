@@ -1,15 +1,27 @@
-import { ArrowLeft, ChevronRight, CircleUserRound, CreditCard, Wifi } from 'lucide-react'
+import { ArrowLeft, ChevronRight, CircleUserRound, CreditCard, LoaderCircle, TriangleAlert, Wifi } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import RiskBadge from '../../components/ui/RiskBadge'
-import WhatIfSimulator from '../simulation/WhatIfSimulator'
 import RetentionActionForm from '../retention/components/RetentionActionForm'
 import RetentionHistory from '../retention/components/RetentionHistory'
+import WhatIfSimulator from '../simulation/WhatIfSimulator'
 import ChurnRiskCard from './components/ChurnRiskCard'
 import CustomerDetailsSection from './components/CustomerDetailsSection'
 import CustomerOverview from './components/CustomerOverview'
-import { customers } from './customerData'
+import { useGetCustomerByIdQuery } from './customersApi'
 
 const currencyFormatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' })
+
+function formatBoolean(value) {
+  if (value === true) return 'Yes'
+  if (value === false) return 'No'
+  return 'N/A'
+}
+
+function formatCurrency(value) {
+  return value === null || value === undefined || !Number.isFinite(Number(value))
+    ? 'N/A'
+    : currencyFormatter.format(Number(value))
+}
 
 function CustomerNotFound({ customerId }) {
   return (
@@ -29,19 +41,46 @@ function CustomerNotFound({ customerId }) {
 
 function CustomerProfilePage() {
   const { id } = useParams()
-  const customer = customers.find((record) => record.customerId.toLowerCase() === id?.toLowerCase())
+  const { data: customer, isLoading, isError, error, refetch } = useGetCustomerByIdQuery(id, { skip: !id })
 
-  if (!customer) return <CustomerNotFound customerId={id} />
+  if (isLoading) {
+    return (
+      <section className="rounded-xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm" role="status">
+        <LoaderCircle className="mx-auto animate-spin text-brand-600" aria-hidden="true" size={28} />
+        <p className="mt-3 text-sm font-medium text-slate-600">Loading customer...</p>
+      </section>
+    )
+  }
+
+  if (isError && error?.status === 404) return <CustomerNotFound customerId={id} />
+
+  if (isError || !customer) {
+    return (
+      <section className="mx-auto max-w-xl rounded-xl border border-red-200 bg-white p-8 text-center shadow-sm" role="alert">
+        <TriangleAlert className="mx-auto text-red-600" aria-hidden="true" size={34} />
+        <h2 className="mt-4 text-xl font-semibold text-slate-900">Unable to load customer.</h2>
+        <p className="mt-2 text-sm text-slate-600">Check the server connection and try again.</p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <button type="button" onClick={refetch} className="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">
+            Retry
+          </button>
+          <Link to="/customers" className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            Back to Customers
+          </Link>
+        </div>
+      </section>
+    )
+  }
 
   const customerDetails = [
     { label: 'Gender', value: customer.gender },
-    { label: 'Senior Citizen', value: customer.seniorCitizen },
-    { label: 'Partner', value: customer.partner },
-    { label: 'Dependents', value: customer.dependents },
+    { label: 'Senior Citizen', value: formatBoolean(customer.seniorCitizen) },
+    { label: 'Partner', value: formatBoolean(customer.partner) },
+    { label: 'Dependents', value: formatBoolean(customer.dependents) },
     { label: 'Tenure', value: `${customer.tenure} ${customer.tenure === 1 ? 'month' : 'months'}` },
   ]
   const serviceDetails = [
-    { label: 'Phone Service', value: customer.phoneService },
+    { label: 'Phone Service', value: formatBoolean(customer.phoneService) },
     { label: 'Multiple Lines', value: customer.multipleLines },
     { label: 'Internet Service', value: customer.internetService },
     { label: 'Online Security', value: customer.onlineSecurity },
@@ -53,10 +92,10 @@ function CustomerProfilePage() {
   ]
   const billingDetails = [
     { label: 'Contract', value: customer.contract },
-    { label: 'Paperless Billing', value: customer.paperlessBilling },
+    { label: 'Paperless Billing', value: formatBoolean(customer.paperlessBilling) },
     { label: 'Payment Method', value: customer.paymentMethod },
-    { label: 'Monthly Charges', value: currencyFormatter.format(customer.monthlyCharges) },
-    { label: 'Total Charges', value: currencyFormatter.format(customer.totalCharges) },
+    { label: 'Monthly Charges', value: formatCurrency(customer.monthlyCharges) },
+    { label: 'Total Charges', value: formatCurrency(customer.totalCharges) },
   ]
 
   return (
@@ -73,10 +112,8 @@ function CustomerProfilePage() {
             <CircleUserRound aria-hidden="true" size={27} />
           </span>
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-950">{customer.name}</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Customer ID: <span className="font-mono text-xs font-medium text-slate-700">{customer.customerId}</span>
-            </p>
+            <h2 className="font-mono text-2xl font-semibold tracking-tight text-slate-950">{customer.customerId}</h2>
+            <p className="mt-1 text-sm text-slate-500">Telecom customer account</p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
