@@ -13,11 +13,30 @@ export const customersApi = baseApi.injectEndpoints({
         url: '/customers',
         params: compactParams({ page, limit, search, risk, contract, sortBy, sortOrder }),
       }),
+      providesTags: [{ type: 'Customers', id: 'LIST' }],
     }),
     getCustomerById: builder.query({
       query: (customerId) => `/customers/${encodeURIComponent(customerId)}`,
+      providesTags: (_result, _error, customerId) => [
+        { type: 'Customers', id: customerId },
+      ],
+    }),
+    createCustomer: builder.mutation({
+      query: (body) => ({
+        url: '/customers',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: (result) => result ? [
+        { type: 'Customers', id: 'LIST' },
+        { type: 'Dashboard', id: 'SUMMARY' },
+      ] : [],
     }),
   }),
 })
 
-export const { useGetCustomersQuery, useGetCustomerByIdQuery } = customersApi
+export const {
+  useCreateCustomerMutation,
+  useGetCustomersQuery,
+  useGetCustomerByIdQuery,
+} = customersApi

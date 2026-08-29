@@ -1,5 +1,5 @@
-import { ArrowLeft, ChevronRight, CircleUserRound, CreditCard, LoaderCircle, TriangleAlert, Wifi } from 'lucide-react'
-import { Link, useParams } from 'react-router-dom'
+import { ArrowLeft, CheckCircle2, ChevronRight, CircleUserRound, CreditCard, LoaderCircle, TriangleAlert, Wifi } from 'lucide-react'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import RiskBadge from '../../components/ui/RiskBadge'
 import RetentionActionForm from '../retention/components/RetentionActionForm'
 import RetentionHistory from '../retention/components/RetentionHistory'
@@ -41,6 +41,7 @@ function CustomerNotFound({ customerId }) {
 
 function CustomerProfilePage() {
   const { id } = useParams()
+  const location = useLocation()
   const { data: customer, isLoading, isError, error, refetch } = useGetCustomerByIdQuery(id, { skip: !id })
 
   if (isLoading) {
@@ -100,6 +101,13 @@ function CustomerProfilePage() {
 
   return (
     <article className="space-y-6">
+      {location.state?.customerCreated && (
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700" role="status">
+          <CheckCircle2 aria-hidden="true" size={19} />
+          Customer created successfully with a model-generated churn risk.
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
         <Link to="/customers" className="rounded text-brand-700 hover:text-brand-800 hover:underline">Customers</Link>
         <ChevronRight aria-hidden="true" size={15} />

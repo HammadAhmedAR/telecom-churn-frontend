@@ -12,3 +12,5 @@ Customer list and profile routes use authenticated RTK Query requests to `GET /a
 Retention actions use authenticated backend APIs and PostgreSQL persistence; RTK Query refreshes customer history, global history, and the Dashboard count after creation.
 
 What-If simulations use the authenticated Express simulation endpoint and real XGBoost predictions. Temporary overrides and results are never persisted to customer records.
+
+Authenticated staff can create model-compatible customer profiles. The backend performs real-time XGBoost inference before persisting each new customer with a baseline churn risk.

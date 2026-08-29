@@ -1,5 +1,7 @@
-import { ChevronLeft, ChevronRight, LoaderCircle, TriangleAlert } from 'lucide-react'
+import { ChevronLeft, ChevronRight, LoaderCircle, TriangleAlert, UserPlus } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import CreateCustomerModal from './components/CreateCustomerModal'
 import CustomerFilters from './components/CustomerFilters'
 import CustomerTable from './components/CustomerTable'
 import { useGetCustomersQuery } from './customersApi'
@@ -8,11 +10,13 @@ const CUSTOMERS_PER_PAGE = 10
 const SEARCH_DEBOUNCE_MS = 350
 
 function CustomersPage() {
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [riskFilter, setRiskFilter] = useState('all')
   const [contractFilter, setContractFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   useEffect(() => {
     const timeout = window.setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS)
@@ -48,11 +52,28 @@ function CustomersPage() {
     setCurrentPage(1)
   }
 
+  function handleCustomerCreated(customer) {
+    setIsCreateModalOpen(false)
+    navigate(`/customers/${encodeURIComponent(customer.customerId)}`, {
+      state: { customerCreated: true },
+    })
+  }
+
   return (
     <section aria-labelledby="customers-title" className="space-y-6">
-      <div>
-        <h2 id="customers-title" className="text-2xl font-semibold tracking-tight text-slate-950">Customers</h2>
-        <p className="mt-1 text-sm leading-6 text-slate-600">Search customer accounts and review churn risk.</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 id="customers-title" className="text-2xl font-semibold tracking-tight text-slate-950">Customers</h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">Search customer accounts and review churn risk.</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsCreateModalOpen(true)}
+          className="inline-flex h-10 items-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white hover:bg-brand-700"
+        >
+          <UserPlus aria-hidden="true" size={18} />
+          Add Customer
+        </button>
       </div>
 
       <CustomerFilters
@@ -130,6 +151,13 @@ function CustomersPage() {
             </button>
           </nav>
         </div>
+      )}
+
+      {isCreateModalOpen && (
+        <CreateCustomerModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onCreated={handleCustomerCreated}
+        />
       )}
     </section>
   )
